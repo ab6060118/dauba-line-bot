@@ -39,6 +39,14 @@ app.post('/hook', middleware,(req:any, res:any) => {
 				text: '在我眼裡，你們講的話不過就是一堆 JSON String 而已，' + JSON.stringify(event.message)
 			})
 		}
+
+		if(message.type === 'text' && message.text === '阿純') {
+			client.replyMessage(event.replyToken, {
+				type: 'image',
+				originalContentUrl: 'https://i.imgur.com/ebLtiKR.jpg',
+				previewImageUrl: 'https://i.imgur.com/ebLtiKR.jpg'
+			})
+		}
 	}
 
 	res.json(req.body.events)
