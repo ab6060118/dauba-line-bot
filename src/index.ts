@@ -25,12 +25,22 @@ const server = https.createServer({
 app.post('/hook', middleware,(req:any, res:any) => {
 	let event = req.body.events[0]
 	
-	if(event.type === 'message' && event.message.text.includes('嫩')) {
-		client.replyMessage(event.replyToken, {
-			type: 'text',
-			text: '在我眼裡，你們講的話不過就是一堆 JSON String 而已，' + JSON.stringify(event.message)
-		})
+	if(event.type === 'message') {
+		let message = event.message;
+		if (message.type === 'text' && message.text === '出去!') {
+			if (event.source.type === 'group') {
+				client.leaveGroup(event.source.groupId);
+			}
+		}
+
+		if (message.type === 'text' && message.text.includes('嫩')) {
+			client.replyMessage(event.replyToken, {
+				type: 'text',
+				text: '在我眼裡，你們講的話不過就是一堆 JSON String 而已，' + JSON.stringify(event.message)
+			})
+		}
 	}
+
 	res.json(req.body.events)
 /*
 	Promise
