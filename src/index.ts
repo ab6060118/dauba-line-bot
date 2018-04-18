@@ -1,9 +1,44 @@
+const express = require('express')
+const https = require('https');
+const fs = require('fs');
+const app = express()
+
 import * as Line from '@line/bot-sdk'
+import Config from '../config'
 
 const config = {
-  channelAccessToken: 'YOUR_CHANNEL_ACCESS_TOKEN',
-  channelSecret: 'YOUR_CHANNEL_SECRET'
+  channelAccessToken: Config.token,
+  channelSecret: Config.secret
 }
 
 const client = new Line.Client(config)
-Line.middleware(config)
+const middleware = Line.middleware(config)
+
+const certificate = fs.readFileSync('ssl/fullchain.pem');
+const privateKey = fs.readFileSync('ssl/privkey.pem');
+
+const server = https.createServer({
+	key: privateKey,
+	cert: certificate
+}, app);
+
+app.post('/hook', middleware,(req:any, res:any) => {
+	let event = req.body.events[0]
+	
+	if(event.type === 'message' && event.message.text.includes('嫩')) {
+		client.replyMessage(event.replyToken, {
+			type: 'text',
+			text: '在我眼裡，你們講的話不過就是一堆 JSON String 而已，' + JSON.stringify(event.message)
+		})
+	}
+	res.json(req.body.events)
+/*
+	Promise
+    	.all(req.body.events.map(handleEvent))
+    	.then((result) => res.json(result));
+*/
+})
+
+server.listen(443, function() {
+    console.log('runing Web Server in ' + 443 + ' port...');
+});
